@@ -94,6 +94,8 @@ public class AlgoVisualizer {
 
 圆的面积，我们怎么获得呢？在这里就使用蒙特卡罗的方法来近似的模拟圆的面积。
 
+在这个正方形中随机地打入一个点，那么这个点可能会落入⚪内，也可能会落入⚪外。那么如果打得点非常多的话，红色点的数量就可以近似的来表示圆的面积。而红色点加绿色点的数量就可以近似的来表示方的面积。
+
 <img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201212191218103.png" alt="image-20201212191218103" style="zoom:50%;" />
 
 ### 三门问题
@@ -205,4 +207,216 @@ public class ThreeGatesExperiment {
 即使是对于O(nlogn) 这样级别的排序算法，比如说归并排序、快速排序或者是堆排序，它所需要的交换次数。都不会像选择排序这样稳定在O(n)这个级别。
 
 那么交换最少意味着什么？如果交换这个操作是非常耗时的话，选择排序就成为了最优的选择。
+
+### Merge Sort
+
+#### TopDown
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/merge_sort.gif" alt="merge_sort" style="zoom:50%;" />
+
+```java
+    public void run(){
+
+        setData(-1, -1, -1);
+
+        mergeSort(0, data.N()-1);
+
+        setData(0, data.N()-1, data.N()-1);
+    }
+
+    private void mergeSort(int l, int r){
+
+        if( l >= r )
+            return;
+
+        setData(l, r, -1);
+
+        int mid = (l+r)/2;
+        mergeSort(l, mid);
+        mergeSort(mid+1, r);
+        merge(l, mid, r);
+    }
+```
+
+#### DownTop
+
+自底向上的归并排序和自顶向下的归并排序的一个主要区别，TopDown可以保证每次划分都是平分的。
+但是DownTop是没有这样保证的。尽管如此，这不意味着DownTop的性能比较差。虽然划分的不够平均，但是层数的差距最多只会差一层。而实际上自底向上的规定排序不需要使用递归算法。所以还减少了递归的开销。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/merge_sort_downtop.gif" alt="merge_sort_downtop" style="zoom:50%;" />
+
+```java
+    public void run(){
+
+        setData(-1, -1, -1);
+
+        for (int sz = 1; sz < data.N(); sz *= 2)
+            for (int i = 0; i < data.N() - sz; i += sz+sz)
+                // 对 arr[i...i+sz-1] 和 arr[i+sz...i+2*sz-1] 进行归并
+                merge(i, i+sz-1, Math.min(i+sz+sz-1,data.N()-1));
+
+        this.setData(0, data.N()-1, data.N()-1);
+    }
+```
+
+### QuickSort
+
+**Partition**:
+
+![image-20201213211026771](https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201213211026771.png)
+
+`i`遍历每一个元素，橙色的部分其实就是数组arr从i+1到 j 的，这一部分的元素都小于v 的，紫色的部分就是arr从j+1到 i-1 的部分。这一部分的元素都大于v。那么对于每一个索引i 位置的元素，分情况讨论，如果对于 e 来说，它是大于v 的。那么这是非常简单的一种情况，直接让这个元素**融入**紫色的部分。那么所谓的融入紫色的部分，其实就是直接`i++`。但是如果下一个待查找的元素e 如果是小于v 的话，那么会稍微复杂一些，将e 这个元素和紫色部分的第一个元素交换位置。而小于v 的部分扩展了一个蓝色的e。那么相应的这个分隔线的位置也发生了改变。所以 j 要相应的++。最终当遍历完了所有的元素之后。就要把这个红色的标定点放入到合适的位置。只需要将v 这个元素和橙色部分的最后一个元素交换一下位置
+
+`j`所指向的位置是标定点所在的位置
+
+**Pivot**: 每次都会将一个元素放到一个位置。这个位置前面的元素都小于它，后面的元素都大于它，这意味着什么？意味着这个元素就已经在了在排好序之后，他本来应该处在的位置。当排好序一个数组之后，随便抽出一个元素。那么这个元素前面的所有的元素一定小于这个元素，后面的所有元素一定大于这个元素。所以每一个曾经被当过这个标定点，也就是的这样的元素一旦放在了合适的位置，这个位置就不用动了。
+
+![quick_sort](https://gitee.com/gaoyi-ai/image-bed/raw/master/images/quick_sort.gif)
+
+```java
+    private int partition(int l, int r){
+
+        int v = data.get(l);
+        setData(l, r, -1, l, -1);
+
+        int j = l; // arr[l+1...j] < v ; arr[j+1...i) > v
+        for( int i = l + 1 ; i <= r ; i ++ ){
+            setData(l, r, -1, l, i);
+            if( data.get(i) < v ){
+                j ++;
+                data.swap(j, i);
+                setData(l, r, -1, l, i);
+            }
+        }
+
+        data.swap(l, j);
+        setData(l, r, j, -1, -1);
+
+        return j;
+    }
+```
+
+#### 数组元素几乎有序的情况
+
+使partition失效，造成pivot处于两端位置，需要通过**Random Pivot**解决
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/quick_sort_random_pivot.gif" alt="quick_sort_random_pivot" style="zoom:50%;" />
+
+```java
+        int p = (int)(Math.random()*(r-l+1)) + l;
+        setData(l, r, -1, p, -1);
+```
+
+#### 数组所有的元素都一致或者几乎一致的情况
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/quick_sort_two_ways-1607867790148.gif" alt="quick_sort_two_ways" style="zoom: 50%;" />
+
+**双路快速排序**
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201213215125965.png" alt="image-20201213215125965" style="zoom:67%;" />
+
+那么对于i 这个索引，从前向后扫描一个元素，而 j 这个索引是从后向前扫描一个元素。其停止条件都是包含等于的。所以对于i 这个索引`e>=v`的时候就停住。对于 j 这个索引`e>=v`的时候就停住。这个数组元素都是相等的元素的话，i 看一个元素，j 也看一个元素就停在了这里。此时这两个元素就发生了一次交换。那么其实这次交换完以后，由于这两个e 他们都等于v 所以其实整个数组的数据没有发生变化。但是 i 索引向后移动，j 索引也向前移动。那么通过这样的机制，i 索引就可以不断的向后移动。而 j 索引可以不断的。向前移动，使得最终橙色部分和紫色部分，其分割线的位置处在整个数组的中央的位置。让整个数组尽量平均的分成两部分，来避免单路的快速排序算法中。出现的面对相同的元素而退化成了O(n^2^) 的问题。
+
+**三路快速排序**
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/quick_sort_three_ways.gif" alt="quick_sort_three_ways" style="zoom:50%;" />
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201213215749360.png" alt="image-20201213215749360" style="zoom:67%;" />
+
+```java
+    private void quickSort3Ways(int l, int r){
+
+        if( l > r )
+            return;
+
+        if( l == r ) {
+            setData(l, r, l, -1, -1, -1);
+            return;
+        }
+
+        setData(l, r, -1, -1, -1, -1);
+
+        // 随机在arr[l...r]的范围中, 选择一个数值作为标定点pivot
+        int p = (int)(Math.random()*(r-l+1)) + l;
+        setData(l, r, -1, p, -1, -1);
+
+        data.swap(l, p);
+        int v = data.get(l);
+        setData(l, r, -1, l, -1, -1);
+
+        int lt = l;     // arr[l+1...lt] < v
+        int gt = r + 1; // arr[gt...r] > v
+        int i = l+1;    // arr[lt+1...i) == v
+        setData(l, r, -1, l, lt, gt);
+
+        while( i < gt ){
+            if( data.get(i) < v ){
+                data.swap( i, lt+1);
+                i ++;
+                lt ++;
+            }
+            else if( data.get(i) > v ){
+                data.swap( i, gt-1);
+                gt --;
+            }
+            else // arr[i] == v
+                i ++;
+
+            setData(l, r, -1, l, i, gt);
+        }
+
+        data.swap( l, lt );
+        setData(l, r, lt, -1, -1, -1);
+
+        // skip equals part
+        quickSort3Ways(l, lt-1 );
+        quickSort3Ways(gt, r);
+    }
+```
+
+### HeapSort
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/heap_sort.gif" alt="heap_sort" style="zoom:50%;" />
+
+```java
+    public void run(){
+
+        setData(data.N());
+
+        // 建堆
+        for( int i = (data.N()-1-1)/2 ; i >= 0 ; i -- ){
+            shiftDown(data.N(), i);
+        }
+
+        // 堆排序
+        for( int i = data.N()-1; i > 0 ; i-- ){
+            data.swap(0, i);
+            shiftDown(i, 0);
+            setData(i);
+        }
+
+        setData(0);
+    }
+
+    /**
+    其中n是来标识[0,n)是一个最大堆。由于整个最大堆的长度是在不断变化的，
+    所以n来指示最大堆是在哪里结束的。
+    */
+    private void shiftDown(int n, int k){
+
+        while( 2*k+1 < n ){
+            int j = 2*k+1;
+            if( j+1 < n && data.get(j+1) > data.get(j) )
+                j += 1;
+
+            if( data.get(k) >= data.get(j) )
+                break;
+
+            data.swap(k, j);
+            setData(data.heapIndex);
+
+            k = j;
+        }
+    }
+```
 
