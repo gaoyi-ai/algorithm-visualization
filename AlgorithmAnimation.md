@@ -420,3 +420,193 @@ public class ThreeGatesExperiment {
     }
 ```
 
+## 迷宫求解问题
+
+### DFS
+
+回溯算法本身通常也都是使用递归，这种方式来实现的
+
+所谓的回溯算法 ，从某种程度来源于其实就是相对比较高级的穷举的方法，所谓的高级，是因为对于某些问题，可能很难使用循环的方式来穷举所有可能，所以使用这种回溯的方式来穷举这些可能。
+
+<img src="images/AlgorithmAnimation/DFS_recursion.gif" alt="DFS_recursion" style="zoom:50%;" />
+
+```java
+    public void run(){
+
+        setData(-1, -1, false);
+
+        if(!go(data.getEntranceX(), data.getEntranceY()))
+            System.out.println("The maze has NO solution!");
+
+        setData(-1, -1, false);
+    }
+
+    // 从(x,y)的位置开始求解迷宫，如果求解成功，返回true；否则返回false
+    private boolean go(int x, int y){
+
+        if(!data.inArea(x,y))
+            throw new IllegalArgumentException("x,y are out of index in go function!");
+
+        data.visited[x][y] = true;
+        setData(x, y, true);
+
+        if(x == data.getExitX() && y == data.getExitY())
+            return true;
+
+        for(int i = 0 ; i < 4 ; i ++){
+            int newX = x + d[i][0];
+            int newY = y + d[i][1];
+            if(data.inArea(newX, newY) &&
+                    data.getMaze(newX,newY) == MazeData.ROAD &&
+                    !data.visited[newX][newY])
+                if(go(newX, newY))
+                    return true;
+        }
+
+        // 回溯
+        setData(x, y, false);
+
+        return false;
+    }
+```
+
+
+
+### Non Recursive DFS
+
+<img src="images/AlgorithmAnimation/DFS_non_recursion.gif" alt="DFS_non_recursion" style="zoom:50%;" />
+
+```java
+    private void run(){
+
+        setData(-1, -1, false);
+
+        Stack<Position> stack = new Stack<Position>();
+        Position entrance = new Position(data.getEntranceX(), data.getEntranceY());
+        stack.push(entrance);
+        data.visited[entrance.getX()][entrance.getY()] = true;
+
+        boolean isSolved = false;
+
+        while(!stack.empty()){
+            Position curPos = stack.pop();
+            setData(curPos.getX(), curPos.getY(), true);
+
+            if(curPos.getX() == data.getExitX() && curPos.getY() == data.getExitY()){
+                isSolved = true;
+                // 当找到出口，向前找到路径
+                findPath(curPos);
+                break;
+            }
+
+            for(int i = 0 ; i < 4  ; i ++){
+                int newX = curPos.getX() + d[i][0];
+                int newY = curPos.getY() + d[i][1];
+
+                if(data.inArea(newX, newY)
+                        && !data.visited[newX][newY]
+                        && data.getMaze(newX, newY) == MazeData.ROAD){
+                    stack.push(new Position(newX, newY, curPos));
+                    data.visited[newX][newY] = true;
+                }
+            }
+
+        }
+
+        if(!isSolved)
+            System.out.println("The maze has no Solution!");
+
+        setData(-1, -1, false);
+    }
+
+    private void findPath(Position des){
+
+        Position cur = des;
+        while(cur != null){
+            data.result[cur.getX()][cur.getY()] = true;
+            cur = cur.getPrev();
+        }
+    }
+```
+
+
+
+### BFS
+
+<img src="images/AlgorithmAnimation/BFS.gif" alt="BFS" style="zoom:50%;" />
+
+```java
+    private void run(){
+
+        setData(-1, -1, false);
+
+        LinkedList<Position> queue = new LinkedList<Position>();
+        Position entrance = new Position(data.getEntranceX(), data.getEntranceY());
+        queue.addLast(entrance);
+        data.visited[entrance.getX()][entrance.getY()] = true;
+
+        boolean isSolved = false;
+
+        while(queue.size() != 0){
+            Position curPos = queue.pop();
+            setData(curPos.getX(), curPos.getY(), true);
+
+            if(curPos.getX() == data.getExitX() && curPos.getY() == data.getExitY()){
+                isSolved = true;
+                findPath(curPos);
+                break;
+            }
+
+            for(int i = 0 ; i < 4  ; i ++){
+                int newX = curPos.getX() + d[i][0];
+                int newY = curPos.getY() + d[i][1];
+
+                if(data.inArea(newX, newY)
+                        && !data.visited[newX][newY]
+                        && data.getMaze(newX, newY) == MazeData.ROAD){
+                    queue.addLast(new Position(newX, newY, curPos));
+                    data.visited[newX][newY] = true;
+                }
+            }
+
+        }
+
+        if(!isSolved)
+            System.out.println("The maze has no Solution!");
+
+        setData(-1, -1, false);
+    }
+```
+
+
+
+### 联系
+
+深度优先遍历和广度优先遍历的关系
+
+- **DFS**
+
+```
+stack.add(入口)
+while( !stack.empty())
+curPos=stack.remove()
+if(curPos==出口) break
+对和curPos相邻的每一个可能的方向
+if(newPos可达)
+stack.add(newPos)
+```
+
+- **BFS**
+
+```
+queue.add(入口)
+while( !queue.empty())
+curPos=queue.remove()
+if(curPos==出口) break
+对和curPos相邻的每一个可能的方向
+if(newPos可达)
+queue.add(newPos)
+```
+
+## 迷宫生成问题
+
