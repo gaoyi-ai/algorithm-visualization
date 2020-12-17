@@ -428,7 +428,7 @@ public class ThreeGatesExperiment {
 
 所谓的回溯算法 ，从某种程度来源于其实就是相对比较高级的穷举的方法，所谓的高级，是因为对于某些问题，可能很难使用循环的方式来穷举所有可能，所以使用这种回溯的方式来穷举这些可能。
 
-<img src="images/AlgorithmAnimation/DFS_recursion.gif" alt="DFS_recursion" style="zoom:50%;" />
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/DFS_recursion.gif" alt="DFS_recursion" style="zoom:50%;" />
 
 ```java
     public void run(){
@@ -474,7 +474,7 @@ public class ThreeGatesExperiment {
 
 ### Non Recursive DFS
 
-<img src="images/AlgorithmAnimation/DFS_non_recursion.gif" alt="DFS_non_recursion" style="zoom:50%;" />
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/DFS_non_recursion.gif" alt="DFS_non_recursion" style="zoom:50%;" />
 
 ```java
     private void run(){
@@ -533,7 +533,7 @@ public class ThreeGatesExperiment {
 
 ### BFS
 
-<img src="images/AlgorithmAnimation/BFS.gif" alt="BFS" style="zoom:50%;" />
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/BFS.gif" alt="BFS" style="zoom:50%;" />
 
 ```java
     private void run(){
@@ -609,4 +609,87 @@ queue.add(newPos)
 ```
 
 ## 迷宫生成问题
+
+迷宫绘制：
+
+1. 只有一个入口，一个出口
+2. 只有一个解
+3. 路径是连续的
+4. 绘制在一个方形画布上
+5. 墙和路径都占一个单元格
+
+### what
+
+这个迷宫它的本质其实是一棵树。这个迷宫是从入口开始，一直要到一个出口。这个过程中可能会有一些岔路。
+
+而树恰恰是满足这样的一个特点的。因为对于任意一棵树来说，从一个节点到另外一个节点，只有一个路径。且经过这些路径的过程中，也会遇到相应的每一个节点的其他的子树这样的分支。比如这里的树。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201217202025033.png" alt="image-20201217202025033" style="zoom:50%;" />
+
+那么如果把它看作迷宫的话，可以指定这个节点是入口，相应的这个节点是出口。这样的一个迷宫，它的正解就是这样的一个路径。在走这个路径的过程中，比如说走到这个节点，相应的就会有很多的岔路。入口和出口不必须是叶子节点，其实树中任意的节点都有可能。
+
+### how
+
+要生成一个随机的迷宫其实是要生成一棵随机的树，一棵随机的树。这样的一个问题本质都是基于图这样的一个数据结构的。也就是说需要在图中寻找一棵树。
+
+事实上图的遍历结果就是一棵生成树。从图中的一点开始出发，然后不管是使用DFS也好，还是使用BFS也好。当遍历完这个图中的所有的节点之后就产生了一棵生成树。这是因为在这个过程中，每一个节点都只访问了一次，就将这些节点全都连接了起来。而且这个过程不会产生环，所以肯定就产生一棵生成树。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/random_maze-1608208008579.gif" alt="random_maze" style="zoom:50%;" />
+
+蓝色是墙，橙色是路径。
+
+由于墙它所占的这个单元格和路径所占的单元格是一致的。所以路径和墙之间总是间隔着一个单位。而这些路径就好像是把它们之间本来间隔的那个墙给打破了之后产生出来的。
+
+可以把橙色的部分，包括橙色和橙色格子之间连接的这个橙色的线。整体看作是一张图，其中这些橙色的格子是图中的节点，而格子和格子之间这个橙色的线条是图的边。要做的就是遍历图来生成迷宫。
+
+---
+
+图四周都是墙，如果有x 行路径，相应的一定有x+1 行墙。即迷宫的行数和列数都是奇数。
+
+当横纵坐标都是奇数的时候，那么在初始化的时候，就应该将它设置成是路。也就是橙色的格子。而如果横纵坐标中有一个是偶数，那么在初始化的时候，都应该将它设置成墙。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201217203600470.png" alt="image-20201217203600470" style="zoom:50%;" />
+
+### 深度及广度优先遍历图
+
+#### BFS
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/bfs_maze.gif" alt="bfs_maze" style="zoom:50%;" />
+
+#### DFS
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/dfs_maze.gif" alt="dfs_maze" style="zoom:50%;" />
+
+### Problem
+
+由于使用的随机队列，每次随机的拿出一个元素作为当前考虑的对象。之后遍历四周的位置再将它们压入随机队列。其实这个过程将会非常像随机化的BFS。也就是每次遍历一个位置，将这个位置相邻的位置都放入这个队列中。然后在这些相邻的位置中随机抽一个再进行这种遍历。和BFS的区别只是在于BFS遍历的顺序是固定的。而现在的遍历的顺序是随机的。
+
+如果随机的抽出的这个元素恰好就是最后一个元素，即恰好就是上一次循环中遍历的这四个元素中，最后压入的这个元素的话，那么在那一刻其实就执行了一个小的深度遍历。
+
+DFS和BFS形成的这个图案的pattern 的不同
+
+可以非常直观的看到迷宫的解，就是从这个正方形的左上角向右走再向下走，最终就来到了出口，之后，所有的岔路都是在向右这个方向走的过程中向下进行的这种平行的岔路。整个广度优先遍历的过程中，没有生成任何的这种弯曲的路径。现在的算法其实就是一个随机的BFS。所以最终得到的结果就是一个整体上是向右和向下的这样的一条路径。
+
+### Solution
+
+比较一下DFS的结果，当使用DFS时，最终的结果虽然也是向下向右，但是会形成S 状的岔路。虽然这个岔路只有一条，但是是这样弯曲的S 状。相比于BFS生成的这些所有的岔路，它都是一条直直的通下底的直线。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201217210846375.png" alt="image-20201217210846375" style="zoom:50%;" />
+
+BFS：生成更多的岔路。但是这些岔路看起来都很规则。
+DFS：虽然整体上只有一条岔路，但这个岔路的形状足够奇怪。
+
+如果能将这二者结合起来，可能生成的迷宫将更加的随机。那么这就启发我们，如果在随机队列中添加可以进行DFS的操作是不是能让迷宫生成的结果看起来更加随机。
+
+这里设计另外一个随机队列，依然是有入队和出队两个操作。
+
+入队：随机的放入这个链表的头或者尾，就是入队首或者入队尾。
+出队：随机的从队首或者队尾挑选元素。
+
+相当于是结合队列和栈这两种数据结构，那么如果从队首入队，队尾出队，或者从队尾入队，队首出队，其实是一个队列
+而如果从对首入队，对首出队或者队尾入队，队尾出队的话，就是一个栈。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/more_random_maze.gif" alt="more_random_maze" style="zoom:50%;" />
+
+## 扫雷
 
