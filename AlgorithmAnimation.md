@@ -693,3 +693,480 @@ DFS：虽然整体上只有一条岔路，但这个岔路的形状足够奇怪�
 
 ## 扫雷
 
+### Knuth洗牌算法
+
+设计一个**公平**的洗牌算法。
+
+公平是指，**对于生成的排列，每一个元素都能等概率地出现在每一个位置。**或者反过来，**每一个位置都能等概率地放置每个元素。**
+
+这个定义和**洗牌结果，可以等概率地给出，一副牌如果有 n 个元素，最终排列的可能性一共有 n! 个。公平的洗牌算法，应该能**等概率地给出这 n! 个结果中的任意一个。**这 n! 个排列中的任意一个，是等价的。**
+
+```
+for(int i = n - 1 ; i >= 0 ; i--)
+	swap(arr[i], arr[rand()%(i+1)])
+```
+
+这个简单的算法，为什么能做到保证：**对于生成的排列，每一个元素都能等概率的出现在每一个位置**了。
+
+模拟一下算法的执行过程，同时，对于每一步，计算一下概率值。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201218213129118.png" alt="image-20201218213129118" style="zoom:50%;" />
+
+那么，根据这个算法，首先会在这五个元素中选一个元素，和最后一个元素 5 交换位置。假设随机出了 2。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201218213233342.png" alt="image-20201218213233342" style="zoom:50%;" />
+
+下面计算 2 出现在最后一个位置的概率是多少？非常简单，因为是从 5 个元素中选的嘛，就是 1/5。实际上，根据这一步，任意一个元素出现在最后一个位置的概率，都是 1/5。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201218213303192.png" alt="image-20201218213303192" style="zoom:50%;" />
+
+根据算法就已经不用管 2 了，而是在前面 4 个元素中，随机一个元素，放在倒数第二的位置。假设随机的是 3。3 和现在倒数第二个位置的元素 4 交换位置。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201218213401406.png" alt="image-20201218213401406" style="zoom:50%;" />
+
+下面的计算非常重要。3 出现在这个位置的概率是多少？计算方式是这样的：
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201218213431081.png" alt="image-20201218213431081" style="zoom:50%;" />
+
+其实很简单，因为 3 逃出了第一轮的筛选，概率是 4/5，但是 3 没有逃过这一轮的选择。在这一轮，一共有4个元素，所以 3 被选中的概率是 1/4。因此，最终，3 出现在这个倒数第二的位置，概率是 4/5 * 1/4 = 1/5。
+
+在整个过程中，每一个元素出现在每一个位置的概率，都是 1/5 ！所以，这个算法是公平的。
+
+当然了，上面只是举例子。这个证明可以很容易地拓展到数组元素个数为 n 的任意数组。整个算法的复杂度是 O(n) 的。
+
+### FloodFill
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201218203301687.png" alt="image-20201218203301687" style="zoom:50%;" />
+
+**Flood fill**, also called **seed fill**, is an [algorithm](https://en.wikipedia.org/wiki/Algorithm) that determines the area [connected](https://en.wikipedia.org/wiki/Glossary_of_graph_theory#Connectivity) to a given node in a multi-dimensional [array](https://en.wikipedia.org/wiki/Array_data_structure). It is used in the "bucket" fill tool of [paint programs](https://en.wikipedia.org/wiki/Paint_program) to fill connected, similarly-colored areas with a different color, and in games such as [Go](https://en.wikipedia.org/wiki/Go_(game)) and [Minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game)) for determining which pieces are cleared.
+
+#### The algorithm
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/Recursive_Flood_Fill_8_(aka).gif" alt="img" style="zoom:67%;" />Recursive flood fill with 8 directions
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/Recursive_Flood_Fill_4_(aka).gif" alt="Recursive_Flood_Fill_4" style="zoom:67%;" />Recursive flood fill with 4 directions
+
+The flood-fill algorithm takes three parameters: a start node, a target color, and a replacement color. The algorithm looks for all nodes in the array that are connected to the start node by a path of the target color and changes them to the replacement color. There are many ways in which the flood-fill algorithm can be structured, but they all make use of a [queue](https://en.wikipedia.org/wiki/Queue_(data_structure)) or [stack](https://en.wikipedia.org/wiki/Stack_(data_structure)) data structure, explicitly or implicitly.
+
+Depending on whether we consider nodes touching at the corners connected or not, we have two variations: eight-way and four-way respectively.
+
+#### Stack-based recursive implementation (four-way)
+
+One implicitly stack-based ([recursive](https://en.wikipedia.org/wiki/Recursion)) flood-fill implementation (for a two-dimensional array) goes as follows:
+
+```
+Flood-fill (node, target-color, replacement-color):
+ 1. If target-color is equal to replacement-color, return.
+ 2. ElseIf the color of node is not equal to target-color, return.
+ 3. Else Set the color of node to replacement-color.
+ 4. Perform Flood-fill (one step to the south of node, target-color, replacement-color).
+    Perform Flood-fill (one step to the north of node, target-color, replacement-color).
+    Perform Flood-fill (one step to the west of node, target-color, replacement-color).
+    Perform Flood-fill (one step to the east of node, target-color, replacement-color).
+ 5. Return.
+```
+
+Though easy to understand, the implementation of the algorithm used above is impractical in languages and environments where stack space is severely constrained
+
+#### Alternative implementations
+
+An explicitly queue-based implementation (sometimes called "Forest Fire algorithm"[[1\]](https://en.wikipedia.org/wiki/Flood_fill#cite_note-1)) is shown in pseudo-code below. It is similar to the simple recursive solution, except that instead of making recursive calls, it pushes the nodes onto a [queue](https://en.wikipedia.org/wiki/Queue_(abstract_data_type)) for consumption:
+
+```
+Flood-fill (node, target-color, replacement-color):
+  1. If target-color is equal to replacement-color, return.
+  2. If color of node is not equal to target-color, return.
+  3. Set the color of node to replacement-color.
+  4. Set Q to the empty queue.
+  5. Add node to the end of Q.
+  6. While Q is not empty:
+  7.     Set n equal to the first element of Q.
+  8.     Remove first element from Q.
+  9.     If the color of the node to the west of n is target-color,
+             set the color of that node to replacement-color and add that node to the end of Q.
+ 10.     If the color of the node to the east of n is target-color,
+             set the color of that node to replacement-color and add that node to the end of Q.
+ 11.     If the color of the node to the north of n is target-color,
+             set the color of that node to replacement-color and add that node to the end of Q.
+ 12.     If the color of the node to the south of n is target-color,
+             set the color of that node to replacement-color and add that node to the end of Q.
+ 13. Continue looping until Q is exhausted.
+ 14. Return.
+```
+
+Practical implementations intended for filling rectangular areas can use a loop for the west and east directions as an optimization to avoid the overhead of stack or queue management:
+
+```
+Flood-fill (node, target-color, replacement-color):
+ 1. If target-color is equal to replacement-color, return.
+ 2. If color of node is not equal to target-color, return.
+ 3. Set Q to the empty queue.
+ 4. Add node to Q.
+ 5. For each element N of Q:
+ 6.     Set w and e equal to N.
+ 7.     Move w to the west until the color of the node to the west of w no longer matches target-color.
+ 8.     Move e to the east until the color of the node to the east of e no longer matches target-color.
+ 9.     For each node n between w and e:
+10.         Set the color of n to replacement-color.
+11.         If the color of the node to the north of n is target-color, add that node to Q.
+12.         If the color of the node to the south of n is target-color, add that node to Q.
+13. Continue looping until Q is exhausted.
+14. Return.
+```
+
+Adapting the algorithm to use an additional array to store the shape of the region allows generalization to cover "fuzzy" flood filling, where an element can differ by up to a specified threshold from the source symbol. Using this additional array as an [alpha channel](https://en.wikipedia.org/wiki/Alpha_compositing) allows the edges of the filled region to blend somewhat smoothly with the not-filled region.
+
+#### Scanline fill
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/212px-Smiley_fill.gif" alt="img" style="zoom:67%;" />Scanline fill
+
+The algorithm can be sped up by filling lines. Instead of pushing each potential future pixel coordinate on the stack, it inspects the neighbour lines (previous and next) to find adjacent segments that may be filled in a future pass; the coordinates (either the start or the end) of the line segment are pushed on the stack. In most cases this scanline algorithm is at least an order of magnitude faster than the per-pixel one.
+
+**Efficiency**: each pixel is checked once.
+
+#### Large-scale behaviour
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/Wfm_floodfill_animation_queue.gif" alt="img" style="zoom:67%;" />Four-way flood fill using a queue for storage
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/Wfm_floodfill_animation_stack.gif" alt="img" style="zoom:67%;" />Four-way flood fill using a stack for storage
+
+The primary technique used to control a flood fill will either be data-centric or process-centric. A data-centric approach can use either a stack or a queue to keep track of seed pixels that need to be checked. A process-centric algorithm must necessarily use a stack.
+
+A 4-way flood-fill algorithm that uses the adjacency technique and a queue as its seed pixel store yields an expanding lozenge-shaped fill.
+
+**Efficiency**: 4 pixels checked for each pixel filled (8 for an 8-way fill).
+
+A 4-way flood-fill algorithm that use the adjacency technique and a stack as its seed pixel store yields a linear fill with "gaps filled later" behaviour. This approach can be particularly seen in older 8-bit computer games, such as those created with *[Graphic Adventure Creator](https://en.wikipedia.org/wiki/Graphic_Adventure_Creator)*.
+
+**Efficiency**: 4 pixels checked for each pixel filled (8 for an 8-way fill).
+
+#### [leetcode 733.图像渲染](https://leetcode-cn.com/problems/flood-fill/solution/tu-xiang-xuan-ran-by-leetcode-solution/)
+
+从给定的起点开始，进行深度优先搜索。每次搜索到一个方格时，如果其与初始位置的方格颜色相同，就将该方格的颜色更新，以防止重复搜索；如果不相同，则进行回溯。
+
+注意：因为初始位置的颜色会被修改，所以需要保存初始位置的颜色，以便于之后的更新操作。
+
+```python
+class Solution:
+    def floodFill(self, image: List[List[int]], sr: int, sc: int, newColor: int) -> List[List[int]]:
+        n, m = len(image), len(image[0])
+        currColor = image[sr][sc]
+
+        def dfs(x: int, y: int):
+            if image[x][y] == currColor:
+                image[x][y] = newColor
+                for mx, my in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
+                    if 0 <= mx < n and 0 <= my < m and image[mx][my] == currColor:
+                        dfs(mx, my)
+
+        if currColor != newColor:
+            dfs(sr, sc)
+        return image
+```
+
+### Flood Fill 算法模型详解
+
+>Reference: [https://jishuin.proginn.com/p/763bfbd233b0](https://jishuin.proginn.com/p/763bfbd233b0)
+
+Flood Fill 在图像处理领域大显身手。例如 photoshop 的魔法棒，当点击图像上的一个像素点的时候，魔法棒就把和这个像素点颜色相近的周围像素点全都选取了，这就是 Flood Fill 算法的一个典型应用。
+
+#### 深度优先搜索
+
+可以从开始位置`(sr, sc)`出发，依次向它的四个方向进行搜索，搜索之前要先把当前像素点的颜色改为`newColor`。
+
+```cpp
+image[r][c] = newColor;
+int vx[] = {0, 0, 1, -1};
+int vy[] = {1, -1, 0, 0};
+for (int i = 0; i < 4; i++) {
+int newr = r + vy[i];
+int newc = c + vx[i];
+    dfs(image, newr, newc, newColor, color);
+}
+```
+
+这样一直搜索下去肯定不行， 要注意 DFS 的结束条件：
+
+1. 当位置（行或列）超过数组的边界时，要结束递归。
+
+```cpp
+if (r >= image.size() || c >= image[0].size()) {
+return;
+}
+```
+
+1. 如果当前位置的颜色值和开始位置`(sr, sc)`的颜色值不同时，不能修改它的颜色值，要结束递归。
+
+```cpp
+if (image[r][c] != color) {
+return;
+}
+```
+
+1. 还有一点要注意的是，当要修改的目标颜色值`newColor`和开始位置的颜色值`image[sr, sc]`相同时，不需要对`image`做任何改变，原`image`就是最终的`image`.
+
+```cpp
+int color = image[sr][sc];
+if (color == newColor) {
+return image;
+}
+```
+
+#### 广度优先搜索
+
+BFS 就是一层一层的往外边搜索边扩张，使用队列来实现。
+
+一开始先把开始位置`(sr, sc)`加入队列，并且修改它的颜色值：
+
+```cpp
+queue<vector<int>> q;
+q.push({sr, sc});
+image[sr][sc] = newColor;
+```
+
+然后队首元素出队列，同时把它上下左右四个方向颜色值为`color`的位置加入到队尾，并修改它们的颜色值为`newColor`。重复操作，直到队列为空。
+
+```cpp
+int vx[] = {0, 0, 1, -1};
+int vy[] = {1, -1, 0, 0};
+while (!q.empty()) {
+vector<int> pos = q.front();
+    q.pop();
+// 标注1
+// image[pos[0]][pos[1]] = newColor;
+for (int i = 0; i < 4; i++) {
+int r = pos[0]+vy[i];
+int c = pos[1]+vx[i];
+if (r >= image.size() || c >= image[0].size()) {
+continue;
+        }
+if (image[r][c] == color) {
+// 标注2
+            image[r][c] = newColor;
+            q.push({r, c});
+        }
+    }
+}
+```
+
+##### 注意
+
+这里特别要提醒的是，**一定要在添加到队尾的同时修改颜色值，不要在出队列时再修改颜色值。** 也就是说修改颜色的代码，要放在`标注2`处，不能放在`标注1`处。
+
+##### 解释
+
+如果等到出队列时再修改颜色值，那对于已经添加到队列中的像素点，虽然他们已经在队列中，但颜色并未及时修改。如果此时出队列的像素点正好位于某个已经在队列中的像素点旁边，那这个已经在队列中的像素点，就会被重复添加到队尾了。
+
+轻则导致耗时增加，严重的话会出现提交超时错误。
+
+#### 并查集
+
+Flood Fill 的定义：漫水填充法是一种用特定的颜色填充**连通区域**，通过设置**可连通像素**的上下限以及**连通方式**来达到不同的填充效果的方法。
+
+定义中多次提到连通，而并查集就是用来解决动态连通性问题的
+
+![](images/AlgorithmAnimation/bc95cbe15e472ad75a5a39f0e4923b19.webp)
+
+假设开始位置`(sr, sc)`的颜色为`color`。可以使用并查集把颜色值为`color`并且位置相邻的像素点连通起来，形成一个连通集合。颜色值不是`color`的每个像素点，单独作为一个集合。
+
+例如下面这种情况（圈起来的是开始位置），使用并查集就把它分成了 4 个连通集合。这时只需要把所有和开始位置`(sr, sc)`在同一个集合的像素点的颜色改为`newColor`就行了。
+
+怎么把它们分成若干个集合呢？从`(0, 0)`位置开始依次遍历，这时就不需要同时兼顾上下左右四个方向了，只需要看看它**右边和下面**的像素点颜色是不是一样都为`color`，一样就合并。不一样就不管它，让它自己单独作为一个集合。
+
+<img src="https://gitee.com/gaoyi-ai/image-bed/raw/master/images/unionset_floodfill.gif" alt="unionset_floodfill" style="zoom:67%;" />
+
+提示，这里每个像素点的位置是二维坐标`(row, col)`，为了方便，需要**将它们的位置映射为一维形式**:`row * colNum + col`。`row`表示行坐标，`col`表示列坐标，`colNum`表示数组的列数。
+
+```cpp
+for (int i = 0; i < rowNum; i++) {
+for (int j = 0; j < colNum; j++) {
+if (image[i][j] != color) {
+continue;
+        }
+int right = j+1;
+int down = i+1;
+if (right < colNum && image[i][right] == color) {
+            u.unio(i*colNum+j, i*colNum+right);
+        }
+if (down < rowNum && image[down][j] == color) {
+            u.unio(i*colNum+j, (down)*colNum+j);
+        }
+    }
+}
+```
+
+那么接下来只需要把和开始位置`(sr, sc)`在同一个连通集合的像素点颜色值置为`newColor`就行了。
+
+```cpp
+for (int i = 0; i < rowNum; i++) {
+for (int j = 0; j < colNum; j++) {
+if (u.connected(i*colNum+j, sr*colNum+sc)) {
+            image[i][j] = newColor;
+        }
+    }
+}
+```
+
+#### 总结
+
+漫水填充算法题型有着这样的特征：空间都是按区域划分的，并且每个区域中的元素都是相邻的。
+
+为了扩大它的解题范围，可以再进一步抽象，把一个个区域抽象为一个个集合，集合中的元素都存在着某种逻辑上的连通性。最典型的就是**547. 朋友圈**[2]。
+
+Flood Fill 这类题还有很多，例如：**1020. 飞地的数量**[3]、**1254. 统计封闭岛屿的数目**[4]、**547. 朋友圈**[5] . . .。如果使用DFS或BFS的话，解决它们的步骤无非就是遍历、标记 加 计数。如果抽象为集合的话，就可以使用并查集对它们进行集合划分，最后只需要对目标集合中的元素进行操作就可以了。
+
+#### CODE
+
+#### 深度优先搜素
+
+```cpp
+class Solution {
+public:
+vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int newColor) {
+int color = image[sr][sc];
+if (color == newColor) {
+return image;
+        }
+        dfs(image, sr, sc, newColor, color);
+return image;
+    }
+
+void dfs(vector<vector<int>>& image, int r, int c, int newColor, int color) {
+if (r >= image.size() || c >= image[0].size()) {
+return;
+        }
+if (image[r][c] != color) {
+return;
+        }
+        image[r][c] = newColor;
+int vx[] = {0, 0, 1, -1};
+int vy[] = {1, -1, 0, 0};
+for (int i = 0; i < 4; i++) {
+int newr = r + vy[i];
+int newc = c + vx[i];
+            dfs(image, newr, newc, newColor, color);
+        }
+    }
+
+};
+```
+
+#### 广度优先搜素
+
+```cpp
+class Solution {
+public:
+vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int newColor) {
+int color = image[sr][sc];
+if (color == newColor) {
+return image;
+        }
+queue<vector<int>> q;
+        q.push({sr, sc});
+        image[sr][sc] = newColor;
+int vx[] = {0, 0, 1, -1};
+int vy[] = {1, -1, 0, 0};
+while (!q.empty()) {
+vector<int> pos = q.front();
+            q.pop();
+for (int i = 0; i < 4; i++) {
+int r = pos[0]+vy[i];
+int c = pos[1]+vx[i];
+if (r >= image.size() || c >= image[0].size()) {
+continue;
+                }
+if (image[r][c] == color) {
+                    image[r][c] = newColor;
+                    q.push({r, c});
+                }
+            }
+        }
+return image;
+    }
+};
+```
+
+#### 并查集
+
+```cpp
+class UnionFind {
+private:
+int* parent;
+
+public:
+    UnionFind(){}
+    UnionFind(int n) {
+        parent = new int[n];
+for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+int find(int x) {
+while (x != parent[x]) {
+            parent[x] = parent[parent[x]];
+            x = parent[x];
+        }
+return x;
+    }
+void unio(int x, int y) {
+        x = find(x);
+        y = find(y);
+if (x == y) {
+return;
+        }
+        parent[y] = x;
+    }
+
+bool connected(int x, int y) {
+return find(x) == find(y);
+    }
+};
+
+class Solution {
+public:
+vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int newColor) {
+int color = image[sr][sc];
+if (color == newColor) {
+return image;
+        }
+int rowNum = image.size();
+int colNum = image[0].size();
+UnionFind u(rowNum * colNum);
+for (int i = 0; i < rowNum; i++) {
+for (int j = 0; j < colNum; j++) {
+if (image[i][j] != color) {
+continue;
+                }
+int right = j+1;
+int down = i+1;
+if (right < colNum && image[i][right] == color) {
+                    u.unio(i*colNum+j, i*colNum+right);
+                }
+if (down < rowNum && image[down][j] == color) {
+                    u.unio(i*colNum+j, (down)*colNum+j);
+                }
+            }
+        }
+for (int i = 0; i < rowNum; i++) {
+for (int j = 0; j < colNum; j++) {
+if (u.connected(i*colNum+j, sr*colNum+sc)) {
+                    image[i][j] = newColor;
+                }
+            }
+        }
+return image;
+    }
+};
+```
+
+#### 参考资料
+
+[1] leetcode 733 图像渲染: *https://leetcode-cn.com/problems/flood-fill/*
+
+[2] 547. 朋友圈: *https://leetcode-cn.com/problems/friend-circles/*
+
+[3] 1020. 飞地的数量: *https://leetcode-cn.com/problems/number-of-enclaves/*
+
+[4] 1254. 统计封闭岛屿的数目: *https://leetcode-cn.com/problems/number-of-closed-islands/*
+
+[5] 547. 朋友圈: *https://leetcode-cn.com/problems/friend-circles/*
