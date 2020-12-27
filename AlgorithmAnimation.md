@@ -965,7 +965,7 @@ Flood Fill 的定义：漫水填充法是一种用特定的颜色填充**连通�
 
 定义中多次提到连通，而并查集就是用来解决动态连通性问题的
 
-![](images/AlgorithmAnimation/bc95cbe15e472ad75a5a39f0e4923b19.webp)
+![image-20201227213944688](https://gitee.com/gaoyi-ai/image-bed/raw/master/images/image-20201227213944688.png)
 
 假设开始位置`(sr, sc)`的颜色为`color`。可以使用并查集把颜色值为`color`并且位置相邻的像素点连通起来，形成一个连通集合。颜色值不是`color`的每个像素点，单独作为一个集合。
 
